@@ -1,4 +1,6 @@
 const express = require('express');
+const { readData } = require('./utils/fsUtils')
+const generateToken = require('./utils/generateToken')
 
 const app = express();
 app.use(express.json());
@@ -14,3 +16,33 @@ app.get('/', (_request, response) => {
 app.listen(PORT, () => {
   console.log('Online 🟢');
 });
+
+app.get('/talker', async (_req, res) => {
+  try {
+    const data = await readData() || [];
+    res.status(200).json(data)
+  } catch (error) {
+    res.status(200).json([]);
+  }
+});
+
+app.get('/talker/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = await readData() || [];
+    const talkerById = data.find((talker) => talker.id === +id); 
+
+    if (!talkerById) {
+      throw new Error('Pessoa palestrante não encontrada');
+    }
+
+    res.status(200).json(talkerById);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+});
+
+app.post('/login', async (req, res) => {
+  res.status(200).json({ token:  generateToken() });
+});
+
