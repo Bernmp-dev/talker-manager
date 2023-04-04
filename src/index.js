@@ -30,7 +30,7 @@ app.get('/talker', async (_req, res) => {
     const data = await readData();
     return res.status(200).json(data);
   } catch (error) {
-    return res.status(200).json([]);
+    return res.status(404).json([]);
   }
 });
 
@@ -48,8 +48,13 @@ app.get('/talker/search', validateToken, async (req, res) => {
 app.get('/talker/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
+    console.log(id);
     const data = await readData();
     const talkerById = data.find((talker) => talker.id === id); 
+
+    if (id > data.length) {
+      throw new Error('Pessoa palestrante não encontrada'); 
+    }
 
     return res.status(200).json(talkerById);
   } catch (error) {
