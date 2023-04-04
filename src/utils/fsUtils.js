@@ -14,7 +14,7 @@ async function readData() {
   }
 }
 
-async function overWrite(pathname, value) {
+async function writeData(pathname, value) {
   try {
     await fs.writeFile(path
       .resolve(__dirname, pathname), JSON.stringify(value));
@@ -23,4 +23,4 @@ async function overWrite(pathname, value) {
     }
 }
 
-module.exports = { readData, overWrite };
+module.exports = { readData, writeData };

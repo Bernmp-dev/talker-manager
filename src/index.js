@@ -1,10 +1,12 @@
 const express = require('express');
-const { readData, overWrite } = require('./utils/fsUtils');
+const { readData, writeData } = require('./utils/fsUtils');
 const generateToken = require('./utils/generateToken');
 const validateLogin = require('./middlewares/validateLogin');
 const validateCredentials = require('./middlewares/validateCredentials');
 const validateToken = require('./middlewares/validateToken');
 const validateId = require('./middlewares/validateId');
+const applyFilters = require('./middlewares/validateSearchs');
+const patchRate = require('./middlewares/patchRate');
 
 const app = express();
 app.use(express.json());
@@ -34,28 +36,20 @@ app.get('/talker', async (_req, res) => {
 
 app.get('/talker/search', validateToken, async (req, res) => {
   try {
-    const searchTerm = req.query.q;
-    const talkers = await readData();
-    const filteredTalkers = searchTerm
-      ? talkers.filter((talker) => talker.name
-        .toLowerCase().includes(searchTerm.toLowerCase()))
-      : talkers;
-
-    return res.status(200).json(filteredTalkers || []);
+    res.locals.initialTalkers = await readData();
+    
+    applyFilters(req, res, () => res.status(200).json(res.locals.talkers));
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    console.error(err);
+    return res.status(500).json({ message: 'Erro interno do servidor' });
   }
 });
 
 app.get('/talker/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = Number(req.params.id);
     const data = await readData();
-    const talkerById = data.find((talker) => talker.id === +id); 
-
-    if (!talkerById) {
-      throw new Error('Pessoa palestrante não encontrada');
-    }
+    const talkerById = data.find((talker) => talker.id === id); 
 
     return res.status(200).json(talkerById);
   } catch (error) {
@@ -79,7 +73,7 @@ app.post('/talker', validateToken, validateCredentials, async (req, res) => {
 
     data.push(newTalker);  
 
-    await overWrite(TALKER_PATH, data);
+    await writeData(TALKER_PATH, data);
 
     return res.status(201).json(newTalker);
   } catch (error) {
@@ -94,33 +88,51 @@ app.put(
   validateCredentials,
   async (req, res) => {
   try {
-    const id = +req.params.id;
+    const id = Number(req.params.id);
     const talkers = await readData();
     const i = talkers.findIndex((talker) => talker.id === id);
 
     talkers[i] = { ...req.body, id };
 
-    await overWrite(TALKER_PATH, talkers);
+    await writeData(TALKER_PATH, talkers);
 
     return res.status(200).json(talkers[i]);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
-},
+ },
+);
 
 app.delete('/talker/:id', validateToken, validateId, async (req, res) => {
   try {
     const talkers = await readData();
-    const id = +req.params.id;
+    const id = Number(req.params.id);
     const index = talkers.findIndex((talker) => talker.id === id);
 
     talkers.splice(index, 1);
 
-    await overWrite(TALKER_PATH, talkers);
+    await writeData(TALKER_PATH, talkers);
 
     return res.status(204).end();
   } catch (err) {
-    return res.status(401).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
-}),
-);
+ });
+
+ app.patch('/talker/rate/:id', validateToken, validateId, patchRate, async (req, res) => {
+  const { id } = req.params;
+  const { rate } = req.body;
+
+  try {
+    const talkers = await readData();
+    const i = talkers.findIndex((talker) => talker.id === Number(id));
+
+    talkers[i].talk.rate = rate;
+    await writeData(TALKER_PATH, talkers);
+
+    return res.status(204).end();
+  } catch (err) {
+    console.error(err);
+    return res.status(400).json({ message: 'Erro interno do servidor' });
+  }
+});
