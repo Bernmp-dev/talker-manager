@@ -4,7 +4,7 @@ const generateToken = require('./utils/generateToken');
 const validateLogin = require('./middlewares/validateLogin');
 const validateCredentials = require('./middlewares/validateCredentials');
 const validateToken = require('./middlewares/validateToken');
-const existingId = require('./middlewares/existingId');
+const validateId = require('./middlewares/validateId');
 
 const app = express();
 app.use(express.json());
@@ -90,7 +90,7 @@ app.post('/talker', validateToken, validateCredentials, async (req, res) => {
 app.put(
   '/talker/:id', 
   validateToken,
-  existingId,
+  validateId,
   validateCredentials,
   async (req, res) => {
   try {
@@ -108,7 +108,7 @@ app.put(
   }
 },
 
-app.delete('/talker/:id', validateToken, existingId, async (req, res) => {
+app.delete('/talker/:id', validateToken, validateId, async (req, res) => {
   try {
     const talkers = await readData();
     const id = +req.params.id;
