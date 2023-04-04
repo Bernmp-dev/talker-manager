@@ -83,9 +83,9 @@ app.put(
     const talkers = await readData() || [];
     const i = talkers.findIndex((talker) => talker.id === id);
 
-    talkers[i] = { ...req.body, id};
+    talkers[i] = { ...req.body, id };
 
-    await overWrite(TALKER_PATH, talkers)
+    await overWrite(TALKER_PATH, talkers);
 
     return res.status(200).json(talkers[i]);
   } catch (err) {
