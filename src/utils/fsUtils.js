@@ -8,7 +8,7 @@ async function readData() {
     const data = await fs.readFile(path.resolve(__dirname, PATH_NAME));
     const response = JSON.parse(data);
 
-    return response;
+    return response || [];
   } catch (err) {
     return console.error(`Erro na leitura do arquivo: ${err}`);
   }

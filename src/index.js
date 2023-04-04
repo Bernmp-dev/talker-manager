@@ -25,7 +25,7 @@ app.listen(PORT, () => {
 
 app.get('/talker', async (_req, res) => {
   try {
-    const data = await readData() || [];
+    const data = await readData();
     return res.status(200).json(data);
   } catch (error) {
     return res.status(200).json([]);
@@ -35,7 +35,7 @@ app.get('/talker', async (_req, res) => {
 app.get('/talker/search', validateToken, async (req, res) => {
   try {
     const searchTerm = req.query.q;
-    const talkers = await readData() || [];
+    const talkers = await readData();
     const filteredTalkers = searchTerm
       ? talkers.filter((talker) => talker.name
         .toLowerCase().includes(searchTerm.toLowerCase()))
@@ -50,7 +50,7 @@ app.get('/talker/search', validateToken, async (req, res) => {
 app.get('/talker/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const data = await readData() || [];
+    const data = await readData();
     const talkerById = data.find((talker) => talker.id === +id); 
 
     if (!talkerById) {
@@ -74,7 +74,7 @@ app.post('/login', validateLogin, (req, res) => {
 
 app.post('/talker', validateToken, validateCredentials, async (req, res) => {
   try {
-    const data = await readData() || [];
+    const data = await readData();
     const newTalker = { id: data.length + 1, ...req.body };
 
     data.push(newTalker);  
@@ -95,7 +95,7 @@ app.put(
   async (req, res) => {
   try {
     const id = +req.params.id;
-    const talkers = await readData() || [];
+    const talkers = await readData();
     const i = talkers.findIndex((talker) => talker.id === id);
 
     talkers[i] = { ...req.body, id };
@@ -110,7 +110,7 @@ app.put(
 
 app.delete('/talker/:id', validateToken, existingId, async (req, res) => {
   try {
-    const talkers = await readData() || [];
+    const talkers = await readData();
     const id = +req.params.id;
     const index = talkers.findIndex((talker) => talker.id === id);
 
