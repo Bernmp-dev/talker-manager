@@ -36,21 +36,12 @@ app.get('/talker/search', validateToken, async (req, res) => {
   try {
     const searchTerm = req.query.q;
     const talkers = await readData() || [];
-    const filteredTalkers = talkers.filter((talker) =>
-      talker.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredTalkers = searchTerm
+      ? talkers.filter((talker) => talker.name
+        .toLowerCase().includes(searchTerm.toLowerCase()))
+      : talkers;
 
-    if (!searchTerm || searchTerm.length <= 0) {
-      console.log(filteredTalkers);
-      return res.status(200).json(talkers);
-    }
-
-    if (!filteredTalkers) {
-      console.log(filteredTalkers);
-      return res.status(200).json([]);
-    }
-
-    console.log(filteredTalkers);
-    return res.status(200).json(filteredTalkers);
+    return res.status(200).json(filteredTalkers || []);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
