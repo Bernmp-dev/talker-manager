@@ -52,19 +52,20 @@ app.post('/login', validateLogin, (req, res) => {
     const token = generateToken();
     return res.status(200).json({ token });
   } catch (error) {
-  return res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 });
 
 app.post('/talker', validateToken, validateCredentials, async (req, res) => {
   try {
     const data = await readData() || [];
-    const talker = req.body;
-    const attTalkers = [...data, talker];
-  
-    // overWrite(TALKER_PATH, attTalkers);
-  
-    return res.status(201).json(talker);
+    const newTalker = { id: data.length + 1, ...req.body };
+
+    data.push(newTalker);  
+
+    await overWrite(TALKER_PATH, data);
+
+    return res.status(201).json(newTalker);
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }

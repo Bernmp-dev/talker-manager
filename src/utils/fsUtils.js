@@ -10,14 +10,17 @@ async function readData() {
 
     return response;
   } catch (err) {
-    return console.error(`Erro na leitura do arquivo:
-     ${err}`);
+    return console.error(`Erro na leitura do arquivo: ${err}`);
   }
 }
 
 async function overWrite(pathname, value) {
-  await fs.writeFile(path
-    .resolve(__dirname, pathname), JSON.stringify(value, null, 2));
+  try {
+    await fs.writeFile(path
+      .resolve(__dirname, pathname), JSON.stringify(value));
+    } catch (err) {
+      return console.error(`Erro ao subscrever do arquivo: ${err}`);
+    }
 }
 
 module.exports = { readData, overWrite };
