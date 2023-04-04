@@ -4,6 +4,7 @@ const generateToken = require('./utils/generateToken');
 const validateLogin = require('./middlewares/validateLogin');
 const validateCredentials = require('./middlewares/validateCredentials');
 const validateToken = require('./middlewares/validateToken');
+const existingId = require('./middlewares/existingId');
 
 const app = express();
 app.use(express.json());
@@ -70,3 +71,25 @@ app.post('/talker', validateToken, validateCredentials, async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 });
+
+app.put(
+  '/talker/:id', 
+  validateToken,
+  existingId,
+  validateCredentials,
+  async (req, res) => {
+  try {
+    const id = +req.params.id;
+    const talkers = await readData() || [];
+    const i = talkers.findIndex((talker) => talker.id === id);
+
+    talkers[i] = { ...req.body, id};
+
+    await overWrite(TALKER_PATH, talkers)
+
+    return res.status(200).json(talkers[i]);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+},
+);
