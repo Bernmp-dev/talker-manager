@@ -1,9 +1,7 @@
 const patchRate = (req, res, next) => {
-  const rate = req.body.rate;
-  console.log(rate);
-
+  const { rate } = req.body;
     
-  if (rate === undefined || rate === NaN) {
+  if (rate === undefined) {
     return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
   }
   
