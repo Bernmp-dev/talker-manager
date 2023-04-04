@@ -92,4 +92,20 @@ app.put(
     return res.status(500).json({ message: err.message });
   }
 },
+
+app.delete('/talker/:id', validateToken, existingId, async (req, res) => {
+  try {
+    const talkers = await readData() || [];
+    const id = +req.params.id;
+    const index = talkers.findIndex((talker) => talker.id === id);
+
+    talkers.splice(index, 1);
+
+    await overWrite(TALKER_PATH, talkers);
+
+    return res.status(204).end();
+  } catch (err) {
+    return res.status(401).json({ message: err.message });
+  }
+}),
 );
